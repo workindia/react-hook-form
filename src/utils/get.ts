@@ -8,7 +8,7 @@ export default <T>(
   path?: string | null,
   defaultValue?: unknown,
 ): any => {
-  console.log(object, path, defaultValue, 'Intial values')
+  console.log(object, path, defaultValue, 'Intial values');
   if (!path || !isObject(object)) {
     return defaultValue;
   }
@@ -18,8 +18,14 @@ export default <T>(
       isNullOrUndefined(result) ? result : result[key as keyof {}],
     object,
   );
-  console.log(object, result, 'Result values')
-  console.log(isUndefined(result), result === object , object[path as keyof T], defaultValue, 'Return result')
+  console.log(object, result, 'Result values');
+  console.log(
+    isUndefined(result),
+    result === object,
+    object[path as keyof T],
+    defaultValue,
+    'Return result',
+  );
 
   return isUndefined(result) || result === object
     ? isUndefined(object[path as keyof T])
