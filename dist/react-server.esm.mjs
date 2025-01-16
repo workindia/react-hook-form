@@ -146,14 +146,25 @@ function deepEqual(object1, object2) {
 
 var isUndefined = (val) => val === undefined;
 
+const consoleLog = (pbj, path) => {
+    if (path === "job_title") {
+        console.log(pbj);
+    }
+};
 var get = (object, path, defaultValue) => {
     console.log(object, path, defaultValue, 'Intial values');
+    consoleLog(JSON.stringify(object) + " " + "Init", path);
+    consoleLog(JSON.stringify(path) + " " + "Init", path);
+    consoleLog(JSON.stringify(defaultValue) + " " + "Init", path);
     if (!path || !isObject(object)) {
         return defaultValue;
     }
     const result = compact(path.split(/[,[\].]+?/)).reduce((result, key) => isNullOrUndefined(result) ? result : result[key], object);
-    console.log(object, result, 'Result values');
-    console.log(isUndefined(result), result === object, object[path], defaultValue, 'Return result');
+    consoleLog(JSON.stringify(result) + " " + "Result", path);
+    consoleLog(JSON.stringify(isUndefined(result)) + " " + "Result", path);
+    consoleLog(JSON.stringify(result === object) + " " + "Result", path);
+    consoleLog(JSON.stringify(object[path]) + " " + "Result", path);
+    consoleLog(JSON.stringify(defaultValue) + " " + "Result", path);
     return isUndefined(result) || result === object
         ? isUndefined(object[path])
             ? defaultValue
