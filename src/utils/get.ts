@@ -3,12 +3,17 @@ import isNullOrUndefined from './isNullOrUndefined';
 import isObject from './isObject';
 import isUndefined from './isUndefined';
 
+
 export default <T>(
   object: T,
   path?: string | null,
   defaultValue?: unknown,
 ): any => {
-  console.log(object, path, defaultValue, 'Intial values');
+
+if(path === "job_title"){
+  console.log(object, defaultValue , 'Intial value')
+}
+
   if (!path || !isObject(object)) {
     return defaultValue;
   }
@@ -18,14 +23,12 @@ export default <T>(
       isNullOrUndefined(result) ? result : result[key as keyof {}],
     object,
   );
-  console.log(object, result, 'Result values');
-  console.log(
-    isUndefined(result),
-    result === object,
-    object[path as keyof T],
-    defaultValue,
-    'Return result',
-  );
+  
+  if(path === "job_title"){
+    console.log(result,isUndefined(result), result === object, object[path as keyof {}], 'Final value')
+  }
+
+  
 
   return isUndefined(result) || result === object
     ? isUndefined(object[path as keyof T])
