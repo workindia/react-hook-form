@@ -65,25 +65,17 @@ var compact = (value) => Array.isArray(value) ? value.filter(Boolean) : [];
 
 var isUndefined = (val) => val === undefined;
 
-const consoleLog = (pbj, path) => {
-    if (path === "job_title") {
-        console.log(pbj);
-    }
-};
 var get = (object, path, defaultValue) => {
-    console.log(object, path, defaultValue, 'Intial values');
-    consoleLog(JSON.stringify(object) + " " + "Init", path);
-    consoleLog(JSON.stringify(path) + " " + "Init", path);
-    consoleLog(JSON.stringify(defaultValue) + " " + "Init", path);
+    if (path === "job_title") {
+        console.log(object, defaultValue, 'Intial value');
+    }
     if (!path || !isObject(object)) {
         return defaultValue;
     }
     const result = compact(path.split(/[,[\].]+?/)).reduce((result, key) => isNullOrUndefined(result) ? result : result[key], object);
-    consoleLog(JSON.stringify(result) + " " + "Result", path);
-    consoleLog(JSON.stringify(isUndefined(result)) + " " + "Result", path);
-    consoleLog(JSON.stringify(result === object) + " " + "Result", path);
-    consoleLog(JSON.stringify(object[path]) + " " + "Result", path);
-    consoleLog(JSON.stringify(defaultValue) + " " + "Result", path);
+    if (path === "job_title") {
+        console.log(result, isUndefined(result), result === object, object[path], 'Final value');
+    }
     return isUndefined(result) || result === object
         ? isUndefined(object[path])
             ? defaultValue
