@@ -8,6 +8,10 @@ export default <T>(
   path?: string | null,
   defaultValue?: unknown,
 ): any => {
+  if (path === 'job_title') {
+    console.log(object, defaultValue, 'Intial value');
+  }
+
   if (!path || !isObject(object)) {
     return defaultValue;
   }
@@ -17,6 +21,16 @@ export default <T>(
       isNullOrUndefined(result) ? result : result[key as keyof {}],
     object,
   );
+
+  if (path === 'job_title') {
+    console.log(
+      result,
+      isUndefined(result),
+      result === object,
+      object[path as keyof T],
+      'Final value',
+    );
+  }
 
   return isUndefined(result) || result === object
     ? isUndefined(object[path as keyof T])
