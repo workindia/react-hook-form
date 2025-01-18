@@ -476,8 +476,9 @@ export function createFormControl<
 
       if (field) {
         const { _f, ...fieldValue } = field as Field;
-
+        
         if (_f) {
+          try{
           const isFieldArrayRoot = _names.array.has(_f.name);
           const isPromiseFunction =
             field._f && hasPromiseValidation((field as Field)._f);
@@ -516,7 +517,11 @@ export function createFormControl<
                   )
                 : set(_formState.errors, _f.name, fieldError[_f.name])
               : unset(_formState.errors, _f.name));
+        }catch(err){
+          console.log(err, 'EXCEPTION')
         }
+      }
+    
 
         !isEmptyObject(fieldValue) &&
           (await executeBuiltInValidation(
