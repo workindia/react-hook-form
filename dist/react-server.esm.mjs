@@ -155,9 +155,9 @@ var get = (object, path, defaultValue) => {
     }
     const result = compact(path.split(/[,[\].]+?/)).reduce((result, key) => isNullOrUndefined(result) ? result : result[key], object);
     if (path === 'job_title') {
-        console.log(result, isUndefined(result), result === object, object[path], 'Final value');
+        console.log(result, isNullOrUndefined(result), result === object, object[path], 'Final value');
     }
-    return isUndefined(result) || result === object
+    return isNullOrUndefined(result) || result === object
         ? isUndefined(object[path])
             ? defaultValue
             : object[path]

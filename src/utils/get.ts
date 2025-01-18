@@ -25,14 +25,14 @@ export default <T>(
   if (path === 'job_title') {
     console.log(
       result,
-      isUndefined(result),
+      isNullOrUndefined(result),
       result === object,
       object[path as keyof T],
       'Final value',
     );
   }
 
-  return isUndefined(result) || result === object
+  return isNullOrUndefined(result) || result === object
     ? isUndefined(object[path as keyof T])
       ? defaultValue
       : object[path as keyof T]
