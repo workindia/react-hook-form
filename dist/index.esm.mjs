@@ -1518,6 +1518,7 @@ function createFormControl(props = {}) {
                     try {
                         const isFieldArrayRoot = _names.array.has(_f.name);
                         const isPromiseFunction = field._f && hasPromiseValidation(field._f);
+                        console.log(isPromiseFunction, hasPromiseValidation(field._f), field._f, 'Function type');
                         if (isPromiseFunction && _proxyFormState.validatingFields) {
                             _updateIsValidating([name], true);
                         }
