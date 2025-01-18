@@ -225,6 +225,7 @@ export function createFormControl<
       _state.action = true;
       if (shouldUpdateFieldsAndState && Array.isArray(get(_fields, name))) {
         const fieldValues = method(get(_fields, name), args.argA, args.argB);
+
         shouldSetValues && set(_fields, name, fieldValues);
       }
 
@@ -477,52 +478,60 @@ export function createFormControl<
         const { _f, ...fieldValue } = field as Field;
 
         if (_f) {
-          const isFieldArrayRoot = _names.array.has(_f.name);
-          const isPromiseFunction =
-            field._f && hasPromiseValidation((field as Field)._f);
+          try {
+            const isFieldArrayRoot = _names.array.has(_f.name);
+            const isPromiseFunction =
+              field._f && hasPromiseValidation((field as Field)._f);
 
-          if (isPromiseFunction && _proxyFormState.validatingFields) {
-            _updateIsValidating([name], true);
-          }
-
-          const fieldError = await validateField(
-            field as Field,
-            _names.disabled,
-            _formValues,
-            shouldDisplayAllAssociatedErrors,
-            _options.shouldUseNativeValidation && !shouldOnlyCheckValid,
-            isFieldArrayRoot,
-          );
-
-          if (isPromiseFunction && _proxyFormState.validatingFields) {
-            _updateIsValidating([name]);
-          }
-
-          if (fieldError[_f.name]) {
-            context.valid = false;
-            if (shouldOnlyCheckValid) {
-              break;
+            if (isPromiseFunction && _proxyFormState.validatingFields) {
+              _updateIsValidating([name], true);
             }
-          }
 
-          !shouldOnlyCheckValid &&
-            (get(fieldError, _f.name)
-              ? isFieldArrayRoot
-                ? updateFieldArrayRootError(
-                    _formState.errors,
-                    fieldError,
-                    _f.name,
-                  )
-                : set(_formState.errors, _f.name, fieldError[_f.name])
-              : unset(_formState.errors, _f.name));
+            const fieldError = await validateField(
+              field as Field,
+              _names.disabled,
+              _formValues,
+              shouldDisplayAllAssociatedErrors,
+              _options.shouldUseNativeValidation && !shouldOnlyCheckValid,
+              isFieldArrayRoot,
+            );
+
+            if (isPromiseFunction && _proxyFormState.validatingFields) {
+              _updateIsValidating([name]);
+            }
+
+            if (fieldError[_f.name]) {
+              context.valid = false;
+              if (shouldOnlyCheckValid) {
+                break;
+              }
+            }
+
+            !shouldOnlyCheckValid &&
+              (get(fieldError, _f.name)
+                ? isFieldArrayRoot
+                  ? updateFieldArrayRootError(
+                      _formState.errors,
+                      fieldError,
+                      _f.name,
+                    )
+                  : set(_formState.errors, _f.name, fieldError[_f.name])
+                : unset(_formState.errors, _f.name));
+          } catch (err) {
+            console.log(err, 'EXCEPTION');
+          }
         }
 
-        !isEmptyObject(fieldValue) &&
-          (await executeBuiltInValidation(
-            fieldValue,
-            shouldOnlyCheckValid,
-            context,
-          ));
+        try {
+          !isEmptyObject(fieldValue) &&
+            (await executeBuiltInValidation(
+              fieldValue,
+              shouldOnlyCheckValid,
+              context,
+            ));
+        } catch (err) {
+          console.log(err, field, 'EXCEPTIO');
+        }
       }
     }
 
@@ -880,14 +889,14 @@ export function createFormControl<
         await Promise.all(
           fieldNames.map(async (fieldName) => {
             const field = get(_fields, fieldName);
-            try{
-            return await executeBuiltInValidation(
-              field && field._f ? { [fieldName]: field } : field,
-            );
-          }catch(err){
-            console.log(err, field, fieldName,'EXCEPTION')
-            return field
-          }
+            try {
+              return await executeBuiltInValidation(
+                field && field._f ? { [fieldName]: field } : field,
+              );
+            } catch (err) {
+              console.log(err, field, fieldName, 'EXCEPTION');
+              return field;
+            }
           }),
         )
       ).every(Boolean);
@@ -1099,7 +1108,7 @@ export function createFormControl<
     let field = get(_fields, name);
     const disabledIsDefined =
       isBoolean(options.disabled) || isBoolean(_options.disabled);
-    
+
     set(_fields, name, {
       ...(field || {}),
       _f: {

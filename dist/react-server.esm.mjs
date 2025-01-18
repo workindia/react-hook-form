@@ -1027,30 +1027,40 @@ function createFormControl(props = {}) {
             if (field) {
                 const { _f, ...fieldValue } = field;
                 if (_f) {
-                    const isFieldArrayRoot = _names.array.has(_f.name);
-                    const isPromiseFunction = field._f && hasPromiseValidation(field._f);
-                    if (isPromiseFunction && _proxyFormState.validatingFields) {
-                        _updateIsValidating([name], true);
-                    }
-                    const fieldError = await validateField(field, _names.disabled, _formValues, shouldDisplayAllAssociatedErrors, _options.shouldUseNativeValidation && !shouldOnlyCheckValid, isFieldArrayRoot);
-                    if (isPromiseFunction && _proxyFormState.validatingFields) {
-                        _updateIsValidating([name]);
-                    }
-                    if (fieldError[_f.name]) {
-                        context.valid = false;
-                        if (shouldOnlyCheckValid) {
-                            break;
+                    try {
+                        const isFieldArrayRoot = _names.array.has(_f.name);
+                        const isPromiseFunction = field._f && hasPromiseValidation(field._f);
+                        if (isPromiseFunction && _proxyFormState.validatingFields) {
+                            _updateIsValidating([name], true);
                         }
+                        const fieldError = await validateField(field, _names.disabled, _formValues, shouldDisplayAllAssociatedErrors, _options.shouldUseNativeValidation && !shouldOnlyCheckValid, isFieldArrayRoot);
+                        if (isPromiseFunction && _proxyFormState.validatingFields) {
+                            _updateIsValidating([name]);
+                        }
+                        if (fieldError[_f.name]) {
+                            context.valid = false;
+                            if (shouldOnlyCheckValid) {
+                                break;
+                            }
+                        }
+                        !shouldOnlyCheckValid &&
+                            (get(fieldError, _f.name)
+                                ? isFieldArrayRoot
+                                    ? updateFieldArrayRootError(_formState.errors, fieldError, _f.name)
+                                    : set(_formState.errors, _f.name, fieldError[_f.name])
+                                : unset(_formState.errors, _f.name));
                     }
-                    !shouldOnlyCheckValid &&
-                        (get(fieldError, _f.name)
-                            ? isFieldArrayRoot
-                                ? updateFieldArrayRootError(_formState.errors, fieldError, _f.name)
-                                : set(_formState.errors, _f.name, fieldError[_f.name])
-                            : unset(_formState.errors, _f.name));
+                    catch (err) {
+                        console.log(err, 'EXCEPTION');
+                    }
                 }
-                !isEmptyObject(fieldValue) &&
-                    (await executeBuiltInValidation(fieldValue, shouldOnlyCheckValid, context));
+                try {
+                    !isEmptyObject(fieldValue) &&
+                        (await executeBuiltInValidation(fieldValue, shouldOnlyCheckValid, context));
+                }
+                catch (err) {
+                    console.log(err, field, 'EXCEPTIO');
+                }
             }
         }
         return context.valid;
