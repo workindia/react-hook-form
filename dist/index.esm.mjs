@@ -66,24 +66,18 @@ var compact = (value) => Array.isArray(value) ? value.filter(Boolean) : [];
 var isUndefined = (val) => val === undefined;
 
 var get = (object, path, defaultValue) => {
-    // if (path === 'job_title') {
-    //   console.log(object, defaultValue, 'Intial value');
-    // }
+    if (path === 'job_title') {
+        console.log(object, defaultValue, 'Intial value');
+    }
     // Safari : {job_title: null} , null
     // Chrome: {job_title : _f { mount..}} null
     if (!path || !isObject(object)) {
         return defaultValue;
     }
     const result = compact(path.split(/[,[\].]+?/)).reduce((result, key) => isNullOrUndefined(result) ? result : result[key], object);
-    // if (path === 'job_title') {
-    //   console.log(
-    //     result,
-    //     isNullOrUndefined(result),
-    //     result === object,
-    //     object[path as keyof T],
-    //     'Final value',
-    //   );
-    // }
+    if (path === 'job_title') {
+        console.log(result, isNullOrUndefined(result), result === object, object[path], 'Final value');
+    }
     return isUndefined(result) || result === object
         ? isUndefined(object[path])
             ? defaultValue
@@ -1359,13 +1353,7 @@ function createFormControl(props = {}) {
             _state.action = true;
             if (shouldUpdateFieldsAndState && Array.isArray(get(_fields, name))) {
                 const fieldValues = method(get(_fields, name), args.argA, args.argB);
-                if (name == "job_title") {
-                    console.log(_fields, fieldValues, 'SETFIELDARRAY before');
-                }
                 shouldSetValues && set(_fields, name, fieldValues);
-                if (name == "job_title") {
-                    console.log(_fields, 'SETFIELDARRAY after');
-                }
             }
             if (shouldUpdateFieldsAndState &&
                 Array.isArray(get(_formState.errors, name))) {
@@ -1778,7 +1766,13 @@ function createFormControl(props = {}) {
         else if (name) {
             validationResult = (await Promise.all(fieldNames.map(async (fieldName) => {
                 const field = get(_fields, fieldName);
-                return await executeBuiltInValidation(field && field._f ? { [fieldName]: field } : field);
+                try {
+                    return await executeBuiltInValidation(field && field._f ? { [fieldName]: field } : field);
+                }
+                catch (err) {
+                    console.log(err, field, fieldName, 'EXCEPTION');
+                    return field;
+                }
             }))).every(Boolean);
             !(!validationResult && !_formState.isValid) && _setValid();
         }
@@ -1873,14 +1867,7 @@ function createFormControl(props = {}) {
             _names.mount.delete(fieldName);
             _names.array.delete(fieldName);
             if (!options.keepValue) {
-                /// EVALUATE
-                if (fieldName == "job_title") {
-                    console.log(_fields, 'UNREGISTER before');
-                }
                 unset(_fields, fieldName);
-                if (fieldName == "job_title") {
-                    console.log(_fields, 'UNREGISTER after');
-                }
                 unset(_formValues, fieldName);
             }
             !options.keepError && unset(_formState.errors, fieldName);
@@ -1912,10 +1899,6 @@ function createFormControl(props = {}) {
     const register = (name, options = {}) => {
         let field = get(_fields, name);
         const disabledIsDefined = isBoolean(options.disabled) || isBoolean(_options.disabled);
-        // evaluate
-        if (name == "job_title") {
-            console.log(_fields, 'REGISTER BEFORE');
-        }
         set(_fields, name, {
             ...(field || {}),
             _f: {
@@ -1937,9 +1920,6 @@ function createFormControl(props = {}) {
         }
         else {
             updateValidAndValue(name, true, options.value);
-        }
-        if (name == "job_title") {
-            console.log(_fields, 'REGISTER AFTER');
         }
         return {
             ...(disabledIsDefined

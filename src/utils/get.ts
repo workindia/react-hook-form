@@ -8,9 +8,9 @@ export default <T>(
   path?: string | null,
   defaultValue?: unknown,
 ): any => {
-  // if (path === 'job_title') {
-  //   console.log(object, defaultValue, 'Intial value');
-  // }
+  if (path === 'job_title') {
+    console.log(object, defaultValue, 'Intial value');
+  }
   // Safari : {job_title: null} , null
   // Chrome: {job_title : _f { mount..}} null
 
@@ -24,15 +24,15 @@ export default <T>(
     object,
   );
 
-  // if (path === 'job_title') {
-  //   console.log(
-  //     result,
-  //     isNullOrUndefined(result),
-  //     result === object,
-  //     object[path as keyof T],
-  //     'Final value',
-  //   );
-  // }
+  if (path === 'job_title') {
+    console.log(
+      result,
+      isNullOrUndefined(result),
+      result === object,
+      object[path as keyof T],
+      'Final value',
+    );
+  }
 
   return isUndefined(result) || result === object
     ? isUndefined(object[path as keyof T])
