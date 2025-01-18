@@ -225,7 +225,13 @@ export function createFormControl<
       _state.action = true;
       if (shouldUpdateFieldsAndState && Array.isArray(get(_fields, name))) {
         const fieldValues = method(get(_fields, name), args.argA, args.argB);
+        if(name == "job_title"){
+          console.log(_fields, fieldValues,'SETFIELDARRAY before')
+        }
         shouldSetValues && set(_fields, name, fieldValues);
+        if(name == "job_title"){
+          console.log(_fields, 'SETFIELDARRAY after')
+        }
       }
 
       if (
@@ -1041,7 +1047,14 @@ export function createFormControl<
       _names.array.delete(fieldName);
 
       if (!options.keepValue) {
+        /// EVALUATE
+        if(fieldName == "job_title"){
+          console.log(_fields, 'UNREGISTER before')
+        }
         unset(_fields, fieldName);
+        if(fieldName == "job_title"){
+          console.log(_fields, 'UNREGISTER after')
+        }
         unset(_formValues, fieldName);
       }
 
@@ -1094,7 +1107,10 @@ export function createFormControl<
     let field = get(_fields, name);
     const disabledIsDefined =
       isBoolean(options.disabled) || isBoolean(_options.disabled);
-
+    // evaluate
+    if(name == "job_title"){
+      console.log(_fields, 'REGISTER BEFORE' )
+    }
     set(_fields, name, {
       ...(field || {}),
       _f: {
@@ -1116,6 +1132,10 @@ export function createFormControl<
       });
     } else {
       updateValidAndValue(name, true, options.value);
+    }
+
+    if(name == "job_title"){
+      console.log(_fields, 'REGISTER AFTER' )
     }
 
     return {
