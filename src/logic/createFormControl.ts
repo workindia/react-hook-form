@@ -490,7 +490,7 @@ export function createFormControl<
           if (isPromiseFunction && _proxyFormState.validatingFields) {
             _updateIsValidating([name], true);
           }
-
+          console.log(field, 'FIELD OBJECT BEFORE ERROR CALL')
           const fieldError = await validateField(
             field as Field,
             _names.disabled,
