@@ -500,6 +500,7 @@ export function createFormControl<
               _options.shouldUseNativeValidation && !shouldOnlyCheckValid,
               isFieldArrayRoot,
             );
+            console.log(fieldError , field, 'ERROR OBJECT IN FIELD')
 
             if (isPromiseFunction && _proxyFormState.validatingFields) {
               _updateIsValidating([name]);

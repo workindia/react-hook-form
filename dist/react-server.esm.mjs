@@ -1037,6 +1037,7 @@ function createFormControl(props = {}) {
                             _updateIsValidating([name], true);
                         }
                         const fieldError = await validateField(field, _names.disabled, _formValues, shouldDisplayAllAssociatedErrors, _options.shouldUseNativeValidation && !shouldOnlyCheckValid, isFieldArrayRoot);
+                        console.log(fieldError, field, 'ERROR OBJECT IN FIELD');
                         if (isPromiseFunction && _proxyFormState.validatingFields) {
                             _updateIsValidating([name]);
                         }
