@@ -491,7 +491,7 @@ export function createFormControl<
             _updateIsValidating([name], true);
           }
           
-          const fieldClone = {...field}
+          const fieldClone = JSON.parse(JSON.stringify(field))
           
           console.log(fieldClone, 'FIELD OBJECT BEFORE ERROR CALL')
 

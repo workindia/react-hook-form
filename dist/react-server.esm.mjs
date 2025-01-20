@@ -1035,7 +1035,7 @@ function createFormControl(props = {}) {
                     if (isPromiseFunction && _proxyFormState.validatingFields) {
                         _updateIsValidating([name], true);
                     }
-                    const fieldClone = { ...field };
+                    const fieldClone = JSON.parse(JSON.stringify(field));
                     console.log(fieldClone, 'FIELD OBJECT BEFORE ERROR CALL');
                     const fieldError = await validateField(fieldClone, _names.disabled, _formValues, shouldDisplayAllAssociatedErrors, _options.shouldUseNativeValidation && !shouldOnlyCheckValid, isFieldArrayRoot);
                     console.log(fieldError, field, 'ERROR OBJECT IN FIELD');
