@@ -478,54 +478,50 @@ export function createFormControl<
         const { _f, ...fieldValue } = field as Field;
 
         if (_f) {
-          try {
-            const isFieldArrayRoot = _names.array.has(_f.name);
-            const isPromiseFunction =
-              field._f && hasPromiseValidation((field as Field)._f);
-            console.log(
-              isPromiseFunction,
-              hasPromiseValidation((field as Field)._f),
-              field._f,
-              'Function type',
-            );
-            if (isPromiseFunction && _proxyFormState.validatingFields) {
-              _updateIsValidating([name], true);
-            }
-
-            const fieldError = await validateField(
-              field as Field,
-              _names.disabled,
-              _formValues,
-              shouldDisplayAllAssociatedErrors,
-              _options.shouldUseNativeValidation && !shouldOnlyCheckValid,
-              isFieldArrayRoot,
-            );
-            console.log(fieldError , field, 'ERROR OBJECT IN FIELD')
-
-            if (isPromiseFunction && _proxyFormState.validatingFields) {
-              _updateIsValidating([name]);
-            }
-
-            if (fieldError[_f.name]) {
-              context.valid = false;
-              if (shouldOnlyCheckValid) {
-                break;
-              }
-            }
-
-            !shouldOnlyCheckValid &&
-              (get(fieldError, _f.name)
-                ? isFieldArrayRoot
-                  ? updateFieldArrayRootError(
-                      _formState.errors,
-                      fieldError,
-                      _f.name,
-                    )
-                  : set(_formState.errors, _f.name, fieldError[_f.name])
-                : unset(_formState.errors, _f.name));
-          } catch (err) {
-            console.log(err, 'EXCEPTION');
+          const isFieldArrayRoot = _names.array.has(_f.name);
+          const isPromiseFunction =
+            field._f && hasPromiseValidation((field as Field)._f);
+          console.log(
+            isPromiseFunction,
+            hasPromiseValidation((field as Field)._f),
+            field._f,
+            'Function type',
+          );
+          if (isPromiseFunction && _proxyFormState.validatingFields) {
+            _updateIsValidating([name], true);
           }
+
+          const fieldError = await validateField(
+            field as Field,
+            _names.disabled,
+            _formValues,
+            shouldDisplayAllAssociatedErrors,
+            _options.shouldUseNativeValidation && !shouldOnlyCheckValid,
+            isFieldArrayRoot,
+          );
+          console.log(fieldError, field, 'ERROR OBJECT IN FIELD');
+
+          if (isPromiseFunction && _proxyFormState.validatingFields) {
+            _updateIsValidating([name]);
+          }
+
+          if (fieldError[_f.name]) {
+            context.valid = false;
+            if (shouldOnlyCheckValid) {
+              break;
+            }
+          }
+
+          !shouldOnlyCheckValid &&
+            (get(fieldError, _f.name)
+              ? isFieldArrayRoot
+                ? updateFieldArrayRootError(
+                    _formState.errors,
+                    fieldError,
+                    _f.name,
+                  )
+                : set(_formState.errors, _f.name, fieldError[_f.name])
+              : unset(_formState.errors, _f.name));
         }
 
         !isEmptyObject(fieldValue) &&
