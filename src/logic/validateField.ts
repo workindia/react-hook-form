@@ -40,7 +40,7 @@ export default async <T extends FieldValues>(
   isFieldArray?: boolean,
 ): Promise<InternalFieldErrors> => {
   const error: InternalFieldErrors = {};
-  console.log(field._f, 'FIELD OBJECT BEFORE');
+  console.log(field, 'FIELD OBJECT BEFORE');
   const {
     ref,
     refs,

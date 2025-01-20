@@ -582,7 +582,7 @@ var getValueAndMessage = (validationData) => isObject(validationData) && !isRege
 
 var validateField = async (field, disabledFieldNames, formValues, validateAllFieldCriteria, shouldUseNativeValidation, isFieldArray) => {
     const error = {};
-    console.log(field._f, 'FIELD OBJECT BEFORE');
+    console.log(field, 'FIELD OBJECT BEFORE');
     const { ref, refs, required, maxLength, minLength, min, max, pattern, validate, name, valueAsNumber, mount, } = field._f;
     console.log(field._f, 'FIELD OBJECT AFTER');
     const inputValue = get(formValues, name);
