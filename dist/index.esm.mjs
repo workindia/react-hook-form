@@ -1513,7 +1513,7 @@ function createFormControl(props = {}) {
         for (const name in fields) {
             const field = fields[name];
             if (field) {
-                const fieldCLone = structuredClone(field);
+                const fieldCLone = JSON.parse(JSON.stringify(field));
                 const { _f, ...fieldValue } = field;
                 if (_f) {
                     const isFieldArrayRoot = _names.array.has(_f.name);

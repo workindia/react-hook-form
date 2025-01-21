@@ -475,7 +475,7 @@ export function createFormControl<
       const field = fields[name];
 
       if (field) {
-        const fieldCLone = structuredClone(field)
+        const fieldCLone = JSON.parse(JSON.stringify(field))
         const { _f, ...fieldValue } = field as Field;
         if (_f) {
           const isFieldArrayRoot = _names.array.has(_f.name);
@@ -492,7 +492,7 @@ export function createFormControl<
           }
 
           console.log(fieldCLone, 'CLONE OF FIELD BEFORE PASSSING')
-          
+
           const fieldError = await validateField(
              fieldCLone as Field,
             _names.disabled,
