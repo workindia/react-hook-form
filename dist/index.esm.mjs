@@ -1068,182 +1068,187 @@ var getValueAndMessage = (validationData) => isObject(validationData) && !isRege
 
 var validateField = async (field, disabledFieldNames, formValues, validateAllFieldCriteria, shouldUseNativeValidation, isFieldArray) => {
     const error = {};
-    console.log(field, 'FIELD OBJECT BEFORE');
-    const { ref, refs, required, maxLength, minLength, min, max, pattern, validate, name, valueAsNumber, mount, } = field._f;
-    console.log(field._f, 'FIELD OBJECT AFTER');
-    const inputValue = get(formValues, name);
-    if (!mount || disabledFieldNames.has(name)) {
-        return {};
-    }
-    const inputRef = refs ? refs[0] : ref;
-    const setCustomValidity = (message) => {
-        if (shouldUseNativeValidation && inputRef.reportValidity) {
-            inputRef.setCustomValidity(isBoolean(message) ? '' : message || '');
-            inputRef.reportValidity();
+    try {
+        console.log(field, 'FIELD OBJECT BEFORE');
+        const { ref, refs, required, maxLength, minLength, min, max, pattern, validate, name, valueAsNumber, mount, } = field._f;
+        console.log(field._f, 'FIELD OBJECT AFTER');
+        const inputValue = get(formValues, name);
+        if (!mount || disabledFieldNames.has(name)) {
+            return {};
         }
-    };
-    const isRadio = isRadioInput(ref);
-    const isCheckBox = isCheckBoxInput(ref);
-    const isRadioOrCheckbox = isRadio || isCheckBox;
-    const isEmpty = ((valueAsNumber || isFileInput(ref)) &&
-        isUndefined(ref.value) &&
-        isUndefined(inputValue)) ||
-        (isHTMLElement(ref) && ref.value === '') ||
-        inputValue === '' ||
-        (Array.isArray(inputValue) && !inputValue.length);
-    const appendErrorsCurry = appendErrors.bind(null, name, validateAllFieldCriteria, error);
-    const getMinMaxMessage = (exceedMax, maxLengthMessage, minLengthMessage, maxType = INPUT_VALIDATION_RULES.maxLength, minType = INPUT_VALIDATION_RULES.minLength) => {
-        const message = exceedMax ? maxLengthMessage : minLengthMessage;
-        error[name] = {
-            type: exceedMax ? maxType : minType,
-            message,
-            ref,
-            ...appendErrorsCurry(exceedMax ? maxType : minType, message),
+        const inputRef = refs ? refs[0] : ref;
+        const setCustomValidity = (message) => {
+            if (shouldUseNativeValidation && inputRef.reportValidity) {
+                inputRef.setCustomValidity(isBoolean(message) ? '' : message || '');
+                inputRef.reportValidity();
+            }
         };
-    };
-    if (isFieldArray
-        ? !Array.isArray(inputValue) || !inputValue.length
-        : required &&
-            ((!isRadioOrCheckbox && (isEmpty || isNullOrUndefined(inputValue))) ||
-                (isBoolean(inputValue) && !inputValue) ||
-                (isCheckBox && !getCheckboxValue(refs).isValid) ||
-                (isRadio && !getRadioValue(refs).isValid))) {
-        const { value, message } = isMessage(required)
-            ? { value: !!required, message: required }
-            : getValueAndMessage(required);
-        if (value) {
+        const isRadio = isRadioInput(ref);
+        const isCheckBox = isCheckBoxInput(ref);
+        const isRadioOrCheckbox = isRadio || isCheckBox;
+        const isEmpty = ((valueAsNumber || isFileInput(ref)) &&
+            isUndefined(ref.value) &&
+            isUndefined(inputValue)) ||
+            (isHTMLElement(ref) && ref.value === '') ||
+            inputValue === '' ||
+            (Array.isArray(inputValue) && !inputValue.length);
+        const appendErrorsCurry = appendErrors.bind(null, name, validateAllFieldCriteria, error);
+        const getMinMaxMessage = (exceedMax, maxLengthMessage, minLengthMessage, maxType = INPUT_VALIDATION_RULES.maxLength, minType = INPUT_VALIDATION_RULES.minLength) => {
+            const message = exceedMax ? maxLengthMessage : minLengthMessage;
             error[name] = {
-                type: INPUT_VALIDATION_RULES.required,
-                message,
-                ref: inputRef,
-                ...appendErrorsCurry(INPUT_VALIDATION_RULES.required, message),
-            };
-            if (!validateAllFieldCriteria) {
-                setCustomValidity(message);
-                return error;
-            }
-        }
-    }
-    if (!isEmpty && (!isNullOrUndefined(min) || !isNullOrUndefined(max))) {
-        let exceedMax;
-        let exceedMin;
-        const maxOutput = getValueAndMessage(max);
-        const minOutput = getValueAndMessage(min);
-        if (!isNullOrUndefined(inputValue) && !isNaN(inputValue)) {
-            const valueNumber = ref.valueAsNumber ||
-                (inputValue ? +inputValue : inputValue);
-            if (!isNullOrUndefined(maxOutput.value)) {
-                exceedMax = valueNumber > maxOutput.value;
-            }
-            if (!isNullOrUndefined(minOutput.value)) {
-                exceedMin = valueNumber < minOutput.value;
-            }
-        }
-        else {
-            const valueDate = ref.valueAsDate || new Date(inputValue);
-            const convertTimeToDate = (time) => new Date(new Date().toDateString() + ' ' + time);
-            const isTime = ref.type == 'time';
-            const isWeek = ref.type == 'week';
-            if (isString(maxOutput.value) && inputValue) {
-                exceedMax = isTime
-                    ? convertTimeToDate(inputValue) > convertTimeToDate(maxOutput.value)
-                    : isWeek
-                        ? inputValue > maxOutput.value
-                        : valueDate > new Date(maxOutput.value);
-            }
-            if (isString(minOutput.value) && inputValue) {
-                exceedMin = isTime
-                    ? convertTimeToDate(inputValue) < convertTimeToDate(minOutput.value)
-                    : isWeek
-                        ? inputValue < minOutput.value
-                        : valueDate < new Date(minOutput.value);
-            }
-        }
-        if (exceedMax || exceedMin) {
-            getMinMaxMessage(!!exceedMax, maxOutput.message, minOutput.message, INPUT_VALIDATION_RULES.max, INPUT_VALIDATION_RULES.min);
-            if (!validateAllFieldCriteria) {
-                setCustomValidity(error[name].message);
-                return error;
-            }
-        }
-    }
-    if ((maxLength || minLength) &&
-        !isEmpty &&
-        (isString(inputValue) || (isFieldArray && Array.isArray(inputValue)))) {
-        const maxLengthOutput = getValueAndMessage(maxLength);
-        const minLengthOutput = getValueAndMessage(minLength);
-        const exceedMax = !isNullOrUndefined(maxLengthOutput.value) &&
-            inputValue.length > +maxLengthOutput.value;
-        const exceedMin = !isNullOrUndefined(minLengthOutput.value) &&
-            inputValue.length < +minLengthOutput.value;
-        if (exceedMax || exceedMin) {
-            getMinMaxMessage(exceedMax, maxLengthOutput.message, minLengthOutput.message);
-            if (!validateAllFieldCriteria) {
-                setCustomValidity(error[name].message);
-                return error;
-            }
-        }
-    }
-    if (pattern && !isEmpty && isString(inputValue)) {
-        const { value: patternValue, message } = getValueAndMessage(pattern);
-        if (isRegex(patternValue) && !inputValue.match(patternValue)) {
-            error[name] = {
-                type: INPUT_VALIDATION_RULES.pattern,
+                type: exceedMax ? maxType : minType,
                 message,
                 ref,
-                ...appendErrorsCurry(INPUT_VALIDATION_RULES.pattern, message),
+                ...appendErrorsCurry(exceedMax ? maxType : minType, message),
             };
-            if (!validateAllFieldCriteria) {
-                setCustomValidity(message);
-                return error;
-            }
-        }
-    }
-    if (validate) {
-        if (isFunction(validate)) {
-            const result = await validate(inputValue, formValues);
-            const validateError = getValidateError(result, inputRef);
-            if (validateError) {
+        };
+        if (isFieldArray
+            ? !Array.isArray(inputValue) || !inputValue.length
+            : required &&
+                ((!isRadioOrCheckbox && (isEmpty || isNullOrUndefined(inputValue))) ||
+                    (isBoolean(inputValue) && !inputValue) ||
+                    (isCheckBox && !getCheckboxValue(refs).isValid) ||
+                    (isRadio && !getRadioValue(refs).isValid))) {
+            const { value, message } = isMessage(required)
+                ? { value: !!required, message: required }
+                : getValueAndMessage(required);
+            if (value) {
                 error[name] = {
-                    ...validateError,
-                    ...appendErrorsCurry(INPUT_VALIDATION_RULES.validate, validateError.message),
+                    type: INPUT_VALIDATION_RULES.required,
+                    message,
+                    ref: inputRef,
+                    ...appendErrorsCurry(INPUT_VALIDATION_RULES.required, message),
                 };
                 if (!validateAllFieldCriteria) {
-                    setCustomValidity(validateError.message);
+                    setCustomValidity(message);
                     return error;
                 }
             }
         }
-        else if (isObject(validate)) {
-            let validationResult = {};
-            for (const key in validate) {
-                if (!isEmptyObject(validationResult) && !validateAllFieldCriteria) {
-                    break;
+        if (!isEmpty && (!isNullOrUndefined(min) || !isNullOrUndefined(max))) {
+            let exceedMax;
+            let exceedMin;
+            const maxOutput = getValueAndMessage(max);
+            const minOutput = getValueAndMessage(min);
+            if (!isNullOrUndefined(inputValue) && !isNaN(inputValue)) {
+                const valueNumber = ref.valueAsNumber ||
+                    (inputValue ? +inputValue : inputValue);
+                if (!isNullOrUndefined(maxOutput.value)) {
+                    exceedMax = valueNumber > maxOutput.value;
                 }
-                const validateError = getValidateError(await validate[key](inputValue, formValues), inputRef, key);
+                if (!isNullOrUndefined(minOutput.value)) {
+                    exceedMin = valueNumber < minOutput.value;
+                }
+            }
+            else {
+                const valueDate = ref.valueAsDate || new Date(inputValue);
+                const convertTimeToDate = (time) => new Date(new Date().toDateString() + ' ' + time);
+                const isTime = ref.type == 'time';
+                const isWeek = ref.type == 'week';
+                if (isString(maxOutput.value) && inputValue) {
+                    exceedMax = isTime
+                        ? convertTimeToDate(inputValue) > convertTimeToDate(maxOutput.value)
+                        : isWeek
+                            ? inputValue > maxOutput.value
+                            : valueDate > new Date(maxOutput.value);
+                }
+                if (isString(minOutput.value) && inputValue) {
+                    exceedMin = isTime
+                        ? convertTimeToDate(inputValue) < convertTimeToDate(minOutput.value)
+                        : isWeek
+                            ? inputValue < minOutput.value
+                            : valueDate < new Date(minOutput.value);
+                }
+            }
+            if (exceedMax || exceedMin) {
+                getMinMaxMessage(!!exceedMax, maxOutput.message, minOutput.message, INPUT_VALIDATION_RULES.max, INPUT_VALIDATION_RULES.min);
+                if (!validateAllFieldCriteria) {
+                    setCustomValidity(error[name].message);
+                    return error;
+                }
+            }
+        }
+        if ((maxLength || minLength) &&
+            !isEmpty &&
+            (isString(inputValue) || (isFieldArray && Array.isArray(inputValue)))) {
+            const maxLengthOutput = getValueAndMessage(maxLength);
+            const minLengthOutput = getValueAndMessage(minLength);
+            const exceedMax = !isNullOrUndefined(maxLengthOutput.value) &&
+                inputValue.length > +maxLengthOutput.value;
+            const exceedMin = !isNullOrUndefined(minLengthOutput.value) &&
+                inputValue.length < +minLengthOutput.value;
+            if (exceedMax || exceedMin) {
+                getMinMaxMessage(exceedMax, maxLengthOutput.message, minLengthOutput.message);
+                if (!validateAllFieldCriteria) {
+                    setCustomValidity(error[name].message);
+                    return error;
+                }
+            }
+        }
+        if (pattern && !isEmpty && isString(inputValue)) {
+            const { value: patternValue, message } = getValueAndMessage(pattern);
+            if (isRegex(patternValue) && !inputValue.match(patternValue)) {
+                error[name] = {
+                    type: INPUT_VALIDATION_RULES.pattern,
+                    message,
+                    ref,
+                    ...appendErrorsCurry(INPUT_VALIDATION_RULES.pattern, message),
+                };
+                if (!validateAllFieldCriteria) {
+                    setCustomValidity(message);
+                    return error;
+                }
+            }
+        }
+        if (validate) {
+            if (isFunction(validate)) {
+                const result = await validate(inputValue, formValues);
+                const validateError = getValidateError(result, inputRef);
                 if (validateError) {
-                    validationResult = {
+                    error[name] = {
                         ...validateError,
-                        ...appendErrorsCurry(key, validateError.message),
+                        ...appendErrorsCurry(INPUT_VALIDATION_RULES.validate, validateError.message),
                     };
-                    setCustomValidity(validateError.message);
-                    if (validateAllFieldCriteria) {
-                        error[name] = validationResult;
+                    if (!validateAllFieldCriteria) {
+                        setCustomValidity(validateError.message);
+                        return error;
                     }
                 }
             }
-            if (!isEmptyObject(validationResult)) {
-                error[name] = {
-                    ref: inputRef,
-                    ...validationResult,
-                };
-                if (!validateAllFieldCriteria) {
-                    return error;
+            else if (isObject(validate)) {
+                let validationResult = {};
+                for (const key in validate) {
+                    if (!isEmptyObject(validationResult) && !validateAllFieldCriteria) {
+                        break;
+                    }
+                    const validateError = getValidateError(await validate[key](inputValue, formValues), inputRef, key);
+                    if (validateError) {
+                        validationResult = {
+                            ...validateError,
+                            ...appendErrorsCurry(key, validateError.message),
+                        };
+                        setCustomValidity(validateError.message);
+                        if (validateAllFieldCriteria) {
+                            error[name] = validationResult;
+                        }
+                    }
+                }
+                if (!isEmptyObject(validationResult)) {
+                    error[name] = {
+                        ref: inputRef,
+                        ...validationResult,
+                    };
+                    if (!validateAllFieldCriteria) {
+                        return error;
+                    }
                 }
             }
         }
+        setCustomValidity(true);
     }
-    setCustomValidity(true);
+    catch (err) {
+        console.log(err, 'ERROR IN VALIDATE');
+    }
     return error;
 };
 
@@ -1507,27 +1512,12 @@ function createFormControl(props = {}) {
         }
         return errors;
     };
-    function deepClone(obj) {
-        if (obj === null || typeof obj !== 'object')
-            return obj;
-        if (Array.isArray(obj)) {
-            return obj.map(item => deepClone(item));
-        }
-        const clone = {};
-        for (const key in obj) {
-            if (Object.prototype.hasOwnProperty.call(obj, key)) {
-                clone[key] = deepClone(obj[key]);
-            }
-        }
-        return clone;
-    }
     const executeBuiltInValidation = async (fields, shouldOnlyCheckValid, context = {
         valid: true,
     }) => {
         for (const name in fields) {
             const field = fields[name];
             if (field) {
-                const fieldClone = deepClone(field);
                 const { _f, ...fieldValue } = field;
                 if (_f) {
                     const isFieldArrayRoot = _names.array.has(_f.name);
@@ -1536,9 +1526,7 @@ function createFormControl(props = {}) {
                     if (isPromiseFunction && _proxyFormState.validatingFields) {
                         _updateIsValidating([name], true);
                     }
-                    Object.freeze(fieldClone);
-                    console.log(fieldClone, 'CLONE OF FIELD BEFORE PASSSING');
-                    const fieldError = await validateField(fieldClone, _names.disabled, _formValues, shouldDisplayAllAssociatedErrors, _options.shouldUseNativeValidation && !shouldOnlyCheckValid, isFieldArrayRoot);
+                    const fieldError = await validateField(field, _names.disabled, _formValues, shouldDisplayAllAssociatedErrors, _options.shouldUseNativeValidation && !shouldOnlyCheckValid, isFieldArrayRoot);
                     console.log(fieldError, field, 'ERROR OBJECT IN FIELD');
                     if (isPromiseFunction && _proxyFormState.validatingFields) {
                         _updateIsValidating([name]);

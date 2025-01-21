@@ -462,23 +462,6 @@ export function createFormControl<
     return errors;
   };
 
-  function deepClone<T>(obj: T): T {
-    if (obj === null || typeof obj !== 'object') return obj;
-
-    if (Array.isArray(obj)) {
-        return obj.map(item => deepClone(item)) as T;
-    }
-
-    const clone: Record<string, any> = {};
-    for (const key in obj) {
-        if (Object.prototype.hasOwnProperty.call(obj, key)) {
-            clone[key] = deepClone(obj[key]);
-        }
-    }
-    return clone as T;
-}
-
-
   const executeBuiltInValidation = async (
     fields: FieldRefs,
     shouldOnlyCheckValid?: boolean,
@@ -492,7 +475,6 @@ export function createFormControl<
       const field = fields[name];
 
       if (field) {
-        const fieldClone = deepClone(field)
         const { _f, ...fieldValue } = field as Field;
         if (_f) {
           const isFieldArrayRoot = _names.array.has(_f.name);
@@ -507,11 +489,9 @@ export function createFormControl<
           if (isPromiseFunction && _proxyFormState.validatingFields) {
             _updateIsValidating([name], true);
           }
-          Object.freeze(fieldClone)
-          console.log(fieldClone, 'CLONE OF FIELD BEFORE PASSSING')
 
           const fieldError = await validateField(
-             fieldClone as Field,
+             field as Field,
             _names.disabled,
             _formValues,
             shouldDisplayAllAssociatedErrors,

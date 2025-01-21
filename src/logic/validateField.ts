@@ -40,6 +40,7 @@ export default async <T extends FieldValues>(
   isFieldArray?: boolean,
 ): Promise<InternalFieldErrors> => {
   const error: InternalFieldErrors = {};
+  try{
   console.log(field, 'FIELD OBJECT BEFORE');
   const {
     ref,
@@ -287,5 +288,8 @@ export default async <T extends FieldValues>(
   }
 
   setCustomValidity(true);
+}catch(err){
+  console.log(err, 'ERROR IN VALIDATE')
+}
   return error;
 };
