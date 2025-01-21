@@ -475,8 +475,8 @@ export function createFormControl<
       const field = fields[name];
 
       if (field) {
+        const fieldCLone = structuredClone(field)
         const { _f, ...fieldValue } = field as Field;
-
         if (_f) {
           const isFieldArrayRoot = _names.array.has(_f.name);
           const isPromiseFunction =
@@ -490,13 +490,11 @@ export function createFormControl<
           if (isPromiseFunction && _proxyFormState.validatingFields) {
             _updateIsValidating([name], true);
           }
-          
-          const fieldClone = JSON.parse(JSON.stringify(field))
-          
-          console.log(fieldClone, 'FIELD OBJECT BEFORE ERROR CALL')
 
+          console.log(fieldCLone, 'CLONE OF FIELD BEFORE PASSSING')
+          
           const fieldError = await validateField(
-             fieldClone as Field,
+             fieldCLone as Field,
             _names.disabled,
             _formValues,
             shouldDisplayAllAssociatedErrors,

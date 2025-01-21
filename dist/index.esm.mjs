@@ -1513,6 +1513,7 @@ function createFormControl(props = {}) {
         for (const name in fields) {
             const field = fields[name];
             if (field) {
+                const fieldCLone = structuredClone(field);
                 const { _f, ...fieldValue } = field;
                 if (_f) {
                     const isFieldArrayRoot = _names.array.has(_f.name);
@@ -1521,9 +1522,8 @@ function createFormControl(props = {}) {
                     if (isPromiseFunction && _proxyFormState.validatingFields) {
                         _updateIsValidating([name], true);
                     }
-                    const fieldClone = JSON.parse(JSON.stringify(field));
-                    console.log(fieldClone, 'FIELD OBJECT BEFORE ERROR CALL');
-                    const fieldError = await validateField(fieldClone, _names.disabled, _formValues, shouldDisplayAllAssociatedErrors, _options.shouldUseNativeValidation && !shouldOnlyCheckValid, isFieldArrayRoot);
+                    console.log(fieldCLone, 'CLONE OF FIELD BEFORE PASSSING');
+                    const fieldError = await validateField(fieldCLone, _names.disabled, _formValues, shouldDisplayAllAssociatedErrors, _options.shouldUseNativeValidation && !shouldOnlyCheckValid, isFieldArrayRoot);
                     console.log(fieldError, field, 'ERROR OBJECT IN FIELD');
                     if (isPromiseFunction && _proxyFormState.validatingFields) {
                         _updateIsValidating([name]);
