@@ -1507,13 +1507,27 @@ function createFormControl(props = {}) {
         }
         return errors;
     };
+    function deepClone(obj) {
+        if (obj === null || typeof obj !== 'object')
+            return obj;
+        if (Array.isArray(obj)) {
+            return obj.map(item => deepClone(item));
+        }
+        const clone = {};
+        for (const key in obj) {
+            if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                clone[key] = deepClone(obj[key]);
+            }
+        }
+        return clone;
+    }
     const executeBuiltInValidation = async (fields, shouldOnlyCheckValid, context = {
         valid: true,
     }) => {
         for (const name in fields) {
             const field = fields[name];
             if (field) {
-                const fieldCLone = JSON.parse(JSON.stringify(field));
+                const fieldClone = deepClone(field);
                 const { _f, ...fieldValue } = field;
                 if (_f) {
                     const isFieldArrayRoot = _names.array.has(_f.name);
@@ -1522,8 +1536,9 @@ function createFormControl(props = {}) {
                     if (isPromiseFunction && _proxyFormState.validatingFields) {
                         _updateIsValidating([name], true);
                     }
-                    console.log(fieldCLone, 'CLONE OF FIELD BEFORE PASSSING');
-                    const fieldError = await validateField(fieldCLone, _names.disabled, _formValues, shouldDisplayAllAssociatedErrors, _options.shouldUseNativeValidation && !shouldOnlyCheckValid, isFieldArrayRoot);
+                    Object.freeze(fieldClone);
+                    console.log(fieldClone, 'CLONE OF FIELD BEFORE PASSSING');
+                    const fieldError = await validateField(fieldClone, _names.disabled, _formValues, shouldDisplayAllAssociatedErrors, _options.shouldUseNativeValidation && !shouldOnlyCheckValid, isFieldArrayRoot);
                     console.log(fieldError, field, 'ERROR OBJECT IN FIELD');
                     if (isPromiseFunction && _proxyFormState.validatingFields) {
                         _updateIsValidating([name]);
